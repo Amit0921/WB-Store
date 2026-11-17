@@ -1,0 +1,48 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+body {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: #f4f3ff;
+  color: #0f172a;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+.action-btn {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #f5f3ff;
+  color: #4c3cce;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: #ede9fe;
+  transform: translateY(-1px);
+}
