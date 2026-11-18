@@ -1,6 +1,7 @@
 package com.wholesale.store.users.controller;
 
 import com.wholesale.store.common.response.ApiResponse;
+import com.wholesale.store.users.dto.ChangePasswordRequest;
 import com.wholesale.store.users.dto.CreateUserRequest;
 import com.wholesale.store.users.dto.UpdateUserRequest;
 import com.wholesale.store.users.dto.UpdateUserStatusRequest;
@@ -33,7 +34,7 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Page<UserResponse>> getAll(
             @RequestParam(defaultValue = "0")
             int page,
@@ -48,7 +49,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<UserResponse> getById(
             @PathVariable Integer id
     ) {
@@ -60,7 +61,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<UserResponse> update(
             @PathVariable Integer id,
             @RequestBody UpdateUserRequest request
@@ -73,7 +74,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> updateStatus(
             @PathVariable Integer id,
             @RequestBody UpdateUserStatusRequest request
@@ -82,6 +83,19 @@ public class UserController {
         return ApiResponse.<Void>builder()
                 .success(true)
                 .message("User status updated successfully")
+                .build();
+    }
+
+    @PutMapping("/{id}/password")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> changePassword(
+            @PathVariable Integer id,
+            @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        userService.changePassword(id, request);
+        return ApiResponse.<Void>builder()
+                .success(true)
+                .message("Password updated successfully")
                 .build();
     }
 }

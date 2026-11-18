@@ -5,6 +5,7 @@ import com.wholesale.store.payments.dto.CreatePaymentRequest;
 import com.wholesale.store.payments.dto.PaymentResponse;
 import com.wholesale.store.payments.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,6 +23,28 @@ public class PaymentController {
                 .success(true)
                 .message("Payment received successfully")
                 .data(paymentService.receivePayment(request))
+                .build();
+    }
+
+    @GetMapping
+    public ApiResponse<Page<PaymentResponse>> getAllPayments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer customerId
+    ) {
+        return ApiResponse.<Page<PaymentResponse>>builder()
+                .success(true)
+                .message("Payments fetched successfully")
+                .data(paymentService.getAllPayments(page, size, customerId))
+                .build();
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<PaymentResponse> getPaymentById(@PathVariable Integer id) {
+        return ApiResponse.<PaymentResponse>builder()
+                .success(true)
+                .message("Payment receipt fetched successfully")
+                .data(paymentService.getPaymentById(id))
                 .build();
     }
 }

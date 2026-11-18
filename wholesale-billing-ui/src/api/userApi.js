@@ -1,16 +1,8 @@
-// import api from "./axiosConfig";
-
-// export const getAllUsers = () => api.get("/users");
-// export const getUserById = (id) => api.get(`/users/${id}`);
-// export const createUser = (data) => api.post("/users", data);
-// export const updateUser = (id, data) => api.put(`/users/${id}`, data);
-// export const updateUserStatus = (id, status) => api.patch(`/users/${id}/status`, { status });
-
 import api from "./axiosConfig";
 
-export const getAllUsers = async () => {
-  const res = await api.get("/users");
-  return res.data.data.content || [];
+export const getAllUsers = async (page = 0, size = 50) => {
+  const res = await api.get("/users", { params: { page, size } });
+  return res.data.data?.content || [];
 };
 
 export const getUserById = async (id) => {
@@ -28,7 +20,12 @@ export const updateUser = async (id, data) => {
   return res.data.data;
 };
 
-export const updateUserStatus = async (id, status) => {
-  const res = await api.patch(`/users/${id}/status`, { status });
+export const updateUserStatus = async (id, active) => {
+  const res = await api.patch(`/users/${id}/status`, { active });
+  return res.data.data;
+};
+
+export const changeUserPassword = async (id, data) => {
+  const res = await api.put(`/users/${id}/password`, data);
   return res.data.data;
 };

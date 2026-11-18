@@ -2,6 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import { createCustomer } from "../../api/customerApi";
+import { THEME } from "../../utils/theme";
+import Icon from "../../components/ui/Icon";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import Select from "../../components/ui/Select";
+import Card from "../../components/ui/Card";
+import PageHeader from "../../components/ui/PageHeader";
 
 export default function CustomerCreate() {
   const navigate = useNavigate();
@@ -10,7 +17,9 @@ export default function CustomerCreate() {
     shopName: "",
     ownerName: "",
     phone: "",
+    alternatePhone: "",
     gstin: "",
+    address: "",
     creditLimit: "",
     status: "ACTIVE",
   });
@@ -25,9 +34,10 @@ export default function CustomerCreate() {
     });
   };
 
-  const handleSubmit = async () => {
-    if (!form.shopName || !form.ownerName || !form.phone) {
-      setError("Shop Name, Owner Name and Phone are required");
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (!form.shopName.trim() || !form.ownerName.trim() || !form.phone.trim()) {
+      setError("Shop Name, Owner Name and Primary Phone are required.");
       return;
     }
 
@@ -42,233 +52,170 @@ export default function CustomerCreate() {
 
       navigate("/customers");
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to create customer"
-      );
+      setError(err.response?.data?.message || "Failed to create customer account.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <MainLayout>
-      <div
-        style={{
-          padding: "24px",
-          maxWidth: "900px",
-        }}
-      >
-        {/* Header */}
-        <div
-          style={{
-            marginBottom: "24px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <div>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: "24px",
-                color: "#0f172a",
-              }}
-            >
-              Add Customer
-            </h2>
+    <MainLayout maxWidth={860}>
+      <PageHeader
+        title="Create Customer Profile"
+        subtitle="Register a new wholesale buyer with credit limits and GST credentials"
+        breadcrumbs={[
+          { label: "Directory", path: "/customers" },
+          { label: "Customers", path: "/customers" },
+          { label: "New Profile" },
+        ]}
+        actions={
+          <Button variant="secondary" onClick={() => navigate("/customers")}>
+            Cancel
+          </Button>
+        }
+      />
 
-            <p
-              style={{
-                margin: "4px 0 0",
-                color: "#64748b",
-                fontSize: "14px",
-              }}
-            >
-              Create a new customer account
-            </p>
-          </div>
-
-          <button
-            onClick={() => navigate("/customers")}
-            style={secondaryBtn}
+      <Card>
+        {error && (
+          <div
+            style={{
+              background: THEME.colors.dangerBg,
+              border: `1px solid ${THEME.colors.dangerBorder}`,
+              color: THEME.colors.danger,
+              borderRadius: THEME.radius.md,
+              padding: "12px 16px",
+              fontSize: "13px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 20,
+            }}
           >
-            Back
-          </button>
-        </div>
+            <Icon name="alert-circle" size={16} color={THEME.colors.danger} />
+            <span>{error}</span>
+          </div>
+        )}
 
-        {/* Form Card */}
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "16px",
-            padding: "24px",
-            border: "1px solid #e2e8f0",
-          }}
-        >
-          {error && (
-            <div
-              style={{
-                marginBottom: "20px",
-                background: "#fef2f2",
-                color: "#dc2626",
-                padding: "12px",
-                borderRadius: "8px",
-              }}
-            >
-              {error}
-            </div>
-          )}
-
+        <form onSubmit={handleSubmit}>
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
-              gap: "20px",
+              gap: 16,
+              marginBottom: 16,
             }}
+            className="form-two-col"
           >
-            {/* Shop Name */}
-            <div>
-              <label style={labelStyle}>Shop Name *</label>
-              <input
-                name="shopName"
-                value={form.shopName}
-                onChange={handleChange}
-                style={inputStyle}
-                placeholder="Panda Garments"
-              />
-            </div>
+            <Input
+              label="Shop / Business Name"
+              name="shopName"
+              placeholder="e.g. Arihant Textiles"
+              required
+              value={form.shopName}
+              onChange={handleChange}
+              icon={<Icon name="store" size={15} />}
+            />
 
-            {/* Owner Name */}
-            <div>
-              <label style={labelStyle}>Owner Name *</label>
-              <input
-                name="ownerName"
-                value={form.ownerName}
-                onChange={handleChange}
-                style={inputStyle}
-                placeholder="Panda"
-              />
-            </div>
+            <Input
+              label="Owner / Contact Person"
+              name="ownerName"
+              placeholder="e.g. Rajesh Kumar"
+              required
+              value={form.ownerName}
+              onChange={handleChange}
+              icon={<Icon name="user" size={15} />}
+            />
 
-            {/* Phone */}
-            <div>
-              <label style={labelStyle}>Phone *</label>
-              <input
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                style={inputStyle}
-                placeholder="8144511513"
-              />
-            </div>
+            <Input
+              label="Primary Mobile Phone"
+              name="phone"
+              placeholder="e.g. 9820011223"
+              required
+              value={form.phone}
+              onChange={handleChange}
+              icon={<Icon name="phone" size={15} />}
+            />
 
-            {/* GSTIN */}
-            <div>
-              <label style={labelStyle}>GSTIN</label>
-              <input
-                name="gstin"
-                value={form.gstin}
-                onChange={handleChange}
-                style={inputStyle}
-                placeholder="GST12345"
-              />
-            </div>
+            <Input
+              label="Alternate Phone"
+              name="alternatePhone"
+              placeholder="e.g. 0261-245678"
+              value={form.alternatePhone}
+              onChange={handleChange}
+              icon={<Icon name="phone" size={15} />}
+            />
 
-            {/* Credit Limit */}
-            <div>
-              <label style={labelStyle}>Credit Limit</label>
-              <input
-                type="number"
-                name="creditLimit"
-                value={form.creditLimit}
-                onChange={handleChange}
-                style={inputStyle}
-                placeholder="500000"
-              />
-            </div>
+            <Input
+              label="GSTIN Identification"
+              name="gstin"
+              placeholder="e.g. 24AAACW1234F1Z8"
+              value={form.gstin}
+              onChange={handleChange}
+            />
 
-            {/* Status */}
-            <div>
-              <label style={labelStyle}>Status</label>
+            <Input
+              label="Credit Limit (₹)"
+              type="number"
+              name="creditLimit"
+              placeholder="e.g. 100000"
+              value={form.creditLimit}
+              onChange={handleChange}
+              icon={<Icon name="inr" size={15} />}
+            />
+          </div>
 
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                style={inputStyle}
-              >
-                <option value="ACTIVE">ACTIVE</option>
-                <option value="INACTIVE">INACTIVE</option>
-              </select>
-            </div>
+          <div style={{ marginBottom: 16 }}>
+            <Input
+              label="Billing Address"
+              name="address"
+              placeholder="e.g. Shop #42, Surat Textile Market, Ring Road, Surat"
+              value={form.address}
+              onChange={handleChange}
+              icon={<Icon name="map-pin" size={15} />}
+            />
+          </div>
+
+          <div style={{ width: "50%", marginBottom: 24 }} className="form-full-width">
+            <Select
+              label="Account Status"
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+            >
+              <option value="ACTIVE">ACTIVE (Can purchase on credit)</option>
+              <option value="INACTIVE">INACTIVE (Temporarily suspended)</option>
+            </Select>
           </div>
 
           <div
             style={{
-              marginTop: "30px",
               display: "flex",
               justifyContent: "flex-end",
-              gap: "10px",
+              gap: 10,
+              paddingTop: 16,
+              borderTop: `1px solid ${THEME.colors.borderSubtle}`,
             }}
           >
-            <button
-              onClick={() => navigate("/customers")}
-              style={secondaryBtn}
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              style={primaryBtn}
-            >
-              {loading
-                ? "Creating..."
-                : "Create Customer"}
-            </button>
+            <Button variant="secondary" onClick={() => navigate("/customers")}>
+              Discard
+            </Button>
+            <Button type="submit" loading={loading} icon={<Icon name="check" size={15} />}>
+              Save &amp; Create Profile
+            </Button>
           </div>
-        </div>
-      </div>
+        </form>
+      </Card>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .form-two-col {
+            grid-template-columns: 1fr !important;
+          }
+          .form-full-width {
+            width: 100% !important;
+          }
+        }
+      `}</style>
     </MainLayout>
   );
 }
-
-const labelStyle = {
-  display: "block",
-  marginBottom: "6px",
-  fontSize: "13px",
-  fontWeight: "600",
-  color: "#334155",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px 12px",
-  border: "1px solid #cbd5e1",
-  borderRadius: "8px",
-  fontSize: "14px",
-  outline: "none",
-  boxSizing: "border-box",
-};
-
-const primaryBtn = {
-  background: "#1e40af",
-  color: "#fff",
-  border: "none",
-  borderRadius: "8px",
-  padding: "10px 18px",
-  cursor: "pointer",
-  fontWeight: "600",
-};
-
-const secondaryBtn = {
-  background: "#fff",
-  color: "#334155",
-  border: "1px solid #cbd5e1",
-  borderRadius: "8px",
-  padding: "10px 18px",
-  cursor: "pointer",
-};

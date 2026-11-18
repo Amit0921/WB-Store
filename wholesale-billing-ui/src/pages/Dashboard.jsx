@@ -1,231 +1,277 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
-import { getAllCustomers } from "../api/customerApi";
-import { getAllUsers } from "../api/userApi";
-
-const BRAND = "#4c3cce";
-
-function initials(name = "") {
-  return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
-}
-
-const AV_COLORS = [
-  { bg: "#ede9fe", color: "#4c3cce" },
-  { bg: "#e0f2fe", color: "#0369a1" },
-  { bg: "#fef9c3", color: "#854d0e" },
-  { bg: "#fce7f3", color: "#9d174d" },
-  { bg: "#dcfce7", color: "#166534" },
-];
-const avColor = (name = "") => AV_COLORS[name.charCodeAt(0) % AV_COLORS.length];
-
-function StatCard({ label, value, icon, iconBg, valueColor = "#1e1b4b", trend }) {
-  return (
-    <div style={{ background: "#fff", borderRadius: 12, padding: 16, border: "1px solid #f0eeff" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <span style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.6px", fontWeight: 500 }}>
-          {label}
-        </span>
-        <div style={{ width: 32, height: 32, borderRadius: 8, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>
-          {icon}
-        </div>
-      </div>
-      <div style={{ fontSize: 26, fontWeight: 700, color: valueColor, lineHeight: 1 }}>{value}</div>
-      {trend && <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 5 }}>{trend}</div>}
-    </div>
-  );
-}
-
-const quickActions = [
-  { label: "Add Customer", icon: "➕", path: "/customers/create" },
-  { label: "Create Invoice", icon: "🧾", path: "/invoices/create" },
-  { label: "Receive Payment", icon: "💳", path: "/payments/create" },
-];
-
-const thStyle = {
-  padding: "9px 14px", textAlign: "left", color: "#94a3b8",
-  fontWeight: 500, borderBottom: "1px solid #f0eeff",
-  fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px",
-};
-const tdStyle = { padding: "10px 14px", borderBottom: "1px solid #faf9ff", fontSize: 13, color: "#374151" };
+import { getDashboardMetrics } from "../api/reportApi";
+import { THEME } from "../utils/theme";
+import Icon from "../components/ui/Icon";
+import Button from "../components/ui/Button";
+import Badge from "../components/ui/Badge";
+import StatCard from "../components/ui/StatCard";
+import Card from "../components/ui/Card";
+import PageHeader from "../components/ui/PageHeader";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [customers, setCustomers] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getAllCustomers(), getAllUsers()])
-      .then(([c, u]) => {
-        setCustomers(Array.isArray(c.data) ? c.data : Array.isArray(c) ? c : []);
-        setUsers(Array.isArray(u.data) ? u.data : Array.isArray(u) ? u : []);
-      })
-      .catch(console.error)
+    getDashboardMetrics()
+      .then((data) => setMetrics(data))
+      .catch((err) => console.error("Error fetching dashboard metrics:", err))
       .finally(() => setLoading(false));
   }, []);
-
-  const activeCustomers = customers.filter((c) => c.status === "ACTIVE").length;
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const displayName =
-    (user?.username || "User")
-      .charAt(0)
-      .toUpperCase() +
-    (user?.username || "User").slice(1);
+  const displayName = (user?.fullName || user?.username || "Admin").split(" ")[0];
 
-  const stats = [
-    { label: "Customers", value: loading ? "—" : customers.length, icon: "👥", iconBg: "#ede9fe", valueColor: BRAND, trend: `${activeCustomers} active` },
-    { label: "Active", value: loading ? "—" : activeCustomers, icon: "✅", iconBg: "#dcfce7", valueColor: "#16a34a", trend: "of total customers" },
-    { label: "Users", value: loading ? "—" : users.length, icon: "👤", iconBg: "#fef3c7", valueColor: "#d97706", trend: "system users" },
-    { label: "Invoices", value: "0", icon: "🧾", iconBg: "#fee2e2", valueColor: "#dc2626", trend: "this month" },
-  ];
+  const currentDateFormatted = new Date().toLocaleDateString("en-IN", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   return (
     <MainLayout>
-      <div style={{ padding: "20px 24px", background: "#f5f6fa", minHeight: "100%" }}>
+      {/* Header */}
+      <PageHeader
+        title={`${greeting}, ${displayName}`}
+        subtitle={`${currentDateFormatted} • Live Garments Billing & Ledger Overview`}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => navigate("/billing/retail")}
+              icon={<Icon name="zap" size={15} color={THEME.colors.primary} />}
+            >
+              Retail Counter POS
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => navigate("/invoices/new")}
+              icon={<Icon name="plus" size={15} />}
+            >
+              New Wholesale Bill
+            </Button>
+            <Button
+              variant="success"
+              size="md"
+              onClick={() => navigate("/payments/create")}
+              icon={<Icon name="credit-card" size={15} />}
+            >
+              Collect Due
+            </Button>
+          </>
+        }
+      />
 
-        {/* ── Header ── */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#1e1b4b" }}>
-              {greeting} {displayName}👋</h1>
-            <p style={{ margin: "3px 0 0", fontSize: 12, color: "#94a3b8" }}>
-              {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-            </p>
-          </div>
-          <button
-            onClick={() => navigate("/invoices/create")}
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "9px 18px", background: BRAND, color: "#fff",
-              border: "none", borderRadius: 9, fontSize: 13, fontWeight: 600, cursor: "pointer",
-            }}
-          >
-            ＋ Create Invoice
-          </button>
-        </div>
+      {/* 4 Financial KPI Stat Cards */}
+      <div className="grid-cols-4-responsive" style={{ marginBottom: 24 }}>
+        <StatCard
+          label="Today's Sales Revenue"
+          value={`₹${Number(metrics?.todaySales || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`}
+          subtext={`${metrics?.todayInvoicesCount || 0} bills issued today`}
+          iconName="file-text"
+          variant="primary"
+          loading={loading}
+          onClick={() => navigate("/invoices")}
+        />
 
-        {/* ── Stat cards ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
-          {stats.map((s) => <StatCard key={s.label} {...s} />)}
-        </div>
+        <StatCard
+          label="Collections Today"
+          value={`₹${Number(metrics?.todayPayments || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`}
+          subtext="Cash &amp; UPI settlements"
+          iconName="credit-card"
+          variant="success"
+          loading={loading}
+          onClick={() => navigate("/payments")}
+        />
 
-        {/* ── Row 2 ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 12, marginBottom: 14 }}>
-          {/* Business overview */}
-          <div style={{ background: "#fff", borderRadius: 12, padding: 18, border: "1px solid #f0eeff" }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#1e1b4b", marginBottom: 14 }}>Business Overview</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
-              {[
-                { label: "Total Revenue", value: "₹0", color: BRAND },
-                { label: "Received", value: "₹0", color: "#16a34a" },
-                { label: "Pending", value: "₹0", color: "#dc2626" },
-              ].map((o) => (
-                <div key={o.label} style={{ background: "#f8f7ff", borderRadius: 8, padding: "12px 14px" }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: o.color, marginBottom: 3 }}>{o.value}</div>
-                  <div style={{ fontSize: 11, color: "#94a3b8" }}>{o.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+        <StatCard
+          label="Total Receivables Due"
+          value={`₹${Number(metrics?.totalOutstandingDue || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`}
+          subtext="Total unsettled balance"
+          iconName="alert-triangle"
+          variant="danger"
+          loading={loading}
+          onClick={() => navigate("/reports/dues")}
+        />
 
-          {/* Quick actions */}
-          <div style={{ background: "#fff", borderRadius: 12, padding: 18, border: "1px solid #f0eeff" }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#1e1b4b", marginBottom: 12 }}>Quick Actions</div>
-            {quickActions.map((a) => (
-              <button
-                key={a.path}
-                onClick={() => navigate(a.path)}
-                style={{
-                  display: "flex", alignItems: "center", gap: 9,
-                  padding: "9px 12px", background: "#f8f7ff",
-                  border: "1px solid #ede9fe", borderRadius: 8,
-                  fontSize: 12, fontWeight: 500, color: BRAND,
-                  cursor: "pointer", width: "100%", marginBottom: 7,
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "#ede9fe"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "#f8f7ff"}
-              >
-                <div style={{ width: 24, height: 24, borderRadius: 6, background: "#ede9fe", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, flexShrink: 0 }}>
-                  {a.icon}
-                </div>
-                {a.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <StatCard
+          label="Active Client Accounts"
+          value={metrics?.activeCustomers ?? "—"}
+          subtext="Registered wholesale buyers"
+          iconName="users"
+          variant="info"
+          loading={loading}
+          onClick={() => navigate("/customers")}
+        />
+      </div>
 
-        {/* ── Recent customers ── */}
-        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #f0eeff", overflow: "hidden" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid #f5f3ff" }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#1e1b4b" }}>Recent Customers</span>
-            <span onClick={() => navigate("/customers")} style={{ fontSize: 11, color: BRAND, cursor: "pointer", fontWeight: 500 }}>
-              View All →
-            </span>
-          </div>
-
+      {/* Two Column Layout: Recent Invoices & Top Due Debtors */}
+      <div className="layout-split-responsive dashboard-columns-grid">
+        {/* Recent Invoices Card */}
+        <Card
+          title="Recent Invoices"
+          subtitle="Latest transactions issued across counters"
+          padding={0}
+          action={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/invoices")}
+              iconRight={<Icon name="arrow-right" size={13} />}
+            >
+              View All
+            </Button>
+          }
+        >
           {loading ? (
-            <div style={{ padding: 32, textAlign: "center", color: "#94a3b8", fontSize: 13 }}>Loading…</div>
-          ) : customers.length === 0 ? (
-            <div style={{ padding: 32, textAlign: "center", color: "#94a3b8", fontSize: 13 }}>No customers yet.</div>
+            <div style={{ padding: 32, textAlign: "center", color: THEME.colors.textMuted }}>
+              Loading recent transactions...
+            </div>
+          ) : !metrics?.recentInvoices || metrics.recentInvoices.length === 0 ? (
+            <div style={{ padding: 36, textAlign: "center", color: THEME.colors.textMuted }}>
+              No bills recorded yet.
+            </div>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ background: "#faf9ff" }}>
-                  <th style={thStyle}>Customer</th>
-                  <th style={thStyle}>Shop Name</th>
-                  <th style={thStyle}>Phone</th>
-                  <th style={thStyle}>Current Due</th>
-                  <th style={thStyle}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {customers.slice(0, 6).map((c) => {
-                  const av = avColor(c.shopName || c.ownerName || "");
-                  return (
-                    <tr key={c.id}
-                      onClick={() => navigate(`/customers/${c.id}/summary`)}
-                      style={{ cursor: "pointer" }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = "#faf9ff"}
-                      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+            <div className="table-responsive-container">
+              <table style={{ width: "100%", minWidth: 440, borderCollapse: "collapse", fontSize: "12px", textAlign: "left" }}>
+                <thead>
+                  <tr style={{ background: "#F8FAFC", borderBottom: `1px solid ${THEME.colors.borderSubtle}` }}>
+                    <th style={{ padding: "10px 16px", color: THEME.colors.textSecondary, fontWeight: 700, fontSize: "11px", letterSpacing: "0.04em" }}>BILL #</th>
+                    <th style={{ padding: "10px 16px", color: THEME.colors.textSecondary, fontWeight: 700, fontSize: "11px", letterSpacing: "0.04em" }}>CUSTOMER</th>
+                    <th style={{ padding: "10px 16px", color: THEME.colors.textSecondary, fontWeight: 700, fontSize: "11px", letterSpacing: "0.04em", textAlign: "right" }}>AMOUNT</th>
+                    <th style={{ padding: "10px 16px", color: THEME.colors.textSecondary, fontWeight: 700, fontSize: "11px", letterSpacing: "0.04em", textAlign: "center" }}>STATUS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {metrics.recentInvoices.map((inv) => (
+                    <tr
+                      key={inv.id}
+                      style={{ borderBottom: `1px solid ${THEME.colors.borderSubtle}`, transition: "background 0.12s" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#F8FAFC")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
-                      <td style={tdStyle}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                          <div style={{
-                            width: 28, height: 28, borderRadius: "50%",
-                            background: av.bg, color: av.color,
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 10, fontWeight: 600, flexShrink: 0,
-                          }}>
-                            {initials(c.shopName || c.ownerName || "")}
-                          </div>
-                          {c.shopName || c.ownerName || "—"}
-                        </div>
+                      <td style={{ padding: "11px 16px", fontFamily: "monospace", fontWeight: 700 }}>
+                        <Link
+                          to={`/invoices/${inv.id}`}
+                          style={{ color: THEME.colors.primary, textDecoration: "none" }}
+                        >
+                          {inv.invoiceNo}
+                        </Link>
                       </td>
-                      <td style={tdStyle}>{c.ownerName || c.shopName || "—"}</td>
-                      <td style={tdStyle}>{c.phone || "—"}</td>
-                      <td style={{ ...tdStyle, fontWeight: c.currentDue > 0 ? 600 : 400, color: c.currentDue > 0 ? "#dc2626" : "#374151" }}>
-                        ₹{(c.currentDue || 0).toLocaleString("en-IN")}
+                      <td style={{ padding: "11px 16px", color: THEME.colors.textPrimary, fontWeight: 600 }}>
+                        {inv.customerName}
                       </td>
-                      <td style={tdStyle}>
-                        <span style={{
-                          display: "inline-block", padding: "2px 9px", borderRadius: 12,
-                          fontSize: 10, fontWeight: 600,
-                          background: c.status === "ACTIVE" ? "#dcfce7" : "#fee2e2",
-                          color: c.status === "ACTIVE" ? "#166534" : "#991b1b",
-                        }}>{c.status}</span>
+                      <td
+                        style={{
+                          padding: "11px 16px",
+                          textAlign: "right",
+                          fontWeight: 700,
+                          color: THEME.colors.textPrimary,
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
+                        ₹{Number(inv.finalAmount || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                      </td>
+                      <td style={{ padding: "11px 16px", textAlign: "center" }}>
+                        <Badge size="sm">{inv.paymentStatus}</Badge>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </div>
+        </Card>
 
+        {/* Top Outstanding Debtors Card */}
+        <Card
+          title="Top Receivables"
+          subtitle="Customers with highest pending balances"
+          padding={0}
+          action={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/reports/dues")}
+              iconRight={<Icon name="arrow-right" size={13} />}
+            >
+              Aging Report
+            </Button>
+          }
+        >
+          {loading ? (
+            <div style={{ padding: 32, textAlign: "center", color: THEME.colors.textMuted }}>
+              Loading pending dues...
+            </div>
+          ) : !metrics?.topDueCustomers || metrics.topDueCustomers.length === 0 ? (
+            <div style={{ padding: 36, textAlign: "center", color: THEME.colors.success, fontSize: "13px", fontWeight: 600 }}>
+              All customer dues are completely settled!
+            </div>
+          ) : (
+            <div className="table-responsive-container">
+              <table style={{ width: "100%", minWidth: 440, borderCollapse: "collapse", fontSize: "12px", textAlign: "left" }}>
+                <thead>
+                  <tr style={{ background: "#F8FAFC", borderBottom: `1px solid ${THEME.colors.borderSubtle}` }}>
+                    <th style={{ padding: "10px 16px", color: THEME.colors.textSecondary, fontWeight: 700, fontSize: "11px", letterSpacing: "0.04em" }}>CUSTOMER</th>
+                    <th style={{ padding: "10px 16px", color: THEME.colors.textSecondary, fontWeight: 700, fontSize: "11px", letterSpacing: "0.04em" }}>AGING</th>
+                    <th style={{ padding: "10px 16px", color: THEME.colors.textSecondary, fontWeight: 700, fontSize: "11px", letterSpacing: "0.04em", textAlign: "right" }}>BALANCE</th>
+                    <th style={{ padding: "10px 16px", textAlign: "right" }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {metrics.topDueCustomers.map((c) => (
+                    <tr
+                      key={c.customerId}
+                      style={{ borderBottom: `1px solid ${THEME.colors.borderSubtle}`, transition: "background 0.12s" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#F8FAFC")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <td style={{ padding: "11px 16px" }}>
+                        <Link
+                          to={`/customers/${c.customerId}/summary`}
+                          style={{ color: THEME.colors.textPrimary, fontWeight: 600, textDecoration: "none" }}
+                        >
+                          {c.shopName || c.ownerName}
+                        </Link>
+                      </td>
+                      <td style={{ padding: "11px 16px" }}>
+                        <Badge size="sm">{c.agingBracket}</Badge>
+                      </td>
+                      <td
+                        style={{
+                          padding: "11px 16px",
+                          textAlign: "right",
+                          fontWeight: 800,
+                          color: THEME.colors.danger,
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
+                        ₹{Number(c.currentDue || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                      </td>
+                      <td style={{ padding: "11px 16px", textAlign: "right" }}>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => navigate(`/payments/create?customerId=${c.customerId}`)}
+                        >
+                          Collect
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
       </div>
     </MainLayout>
   );

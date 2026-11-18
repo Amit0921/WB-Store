@@ -11,9 +11,9 @@
 
 import api from "./axiosConfig";
 
-export const getAllCustomers = async () => {
-  const res = await api.get("/customers");
-  return res.data.data.content || [];
+export const getAllCustomers = async (page = 0, size = 100) => {
+  const res = await api.get("/customers", { params: { page, size } });
+  return res.data.data?.content || [];
 };
 
 export const getCustomerById = async (id) => {
@@ -22,8 +22,9 @@ export const getCustomerById = async (id) => {
 };
 
 export const searchCustomers = async (query) => {
-  const res = await api.get("/customers/search", { params: query });
-  return res.data.data || [];
+  const params = typeof query === "string" ? { keyword: query } : query;
+  const res = await api.get("/customers/search", { params });
+  return res.data.data?.content || res.data.data || [];
 };
 
 export const getCustomerSummary = async (id) => {

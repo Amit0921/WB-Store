@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface CustomerRepository
         extends JpaRepository<Customer, Integer> {
@@ -19,4 +20,12 @@ public interface CustomerRepository
             String phone,
             Pageable pageable
     );
+
+    List<Customer> findByCurrentDueGreaterThanOrderByCurrentDueDesc(BigDecimal amount);
+
+    @Query("SELECT COUNT(c) FROM Customer c WHERE c.status = 'ACTIVE' AND c.deleted = false")
+    Long countActiveCustomers();
+
+    @Query("SELECT COALESCE(SUM(c.currentDue), 0) FROM Customer c WHERE c.deleted = false")
+    BigDecimal getTotalOutstandingDues();
 }

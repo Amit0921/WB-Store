@@ -3,14 +3,23 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import { getAllCustomers } from "../../api/customerApi";
 import { receivePayment } from "../../api/paymentApi";
+import PageHeader from "../../components/ui/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import Select from "../../components/ui/Select";
+import Icon from "../../components/ui/Icon";
+import { colors, radius, shadows } from "../../utils/theme";
 
 export default function CreatePayment() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const preselectedCustomerId = searchParams.get("customerId");
+  const preselectedInvoiceId = searchParams.get("invoiceId");
 
   const [customers, setCustomers] = useState([]);
   const [customerId, setCustomerId] = useState(preselectedCustomerId || "");
+  const [invoiceId, setInvoiceId] = useState(preselectedInvoiceId || "");
   const [amount, setAmount] = useState("");
   const [paymentMode, setPaymentMode] = useState("UPI");
   const [referenceNumber, setReferenceNumber] = useState("");
@@ -23,6 +32,18 @@ export default function CreatePayment() {
       .then((data) => setCustomers(data || []))
       .catch((err) => console.error("Error loading customers:", err));
   }, []);
+
+  const isWholesaleCustomer = (c) => {
+    if (!c || c.status === "INACTIVE") return false;
+    const name = (c.shopName || "").toLowerCase();
+    const owner = (c.ownerName || "").toLowerCase();
+    const addr = (c.address || "").toLowerCase();
+    if (name.includes("walk-in") || name.includes("walkin") || name.includes("counter cash")) return false;
+    if (addr.includes("retail counter sale") || addr.includes("counter sale")) return false;
+    if (name.endsWith(" retail") || owner.endsWith(" retail")) return false;
+    return true;
+  };
+  const wholesaleCustomers = customers.filter(isWholesaleCustomer);
 
   const selectedCustomer = customers.find((c) => String(c.id) === String(customerId));
   const currentDue = selectedCustomer ? Number(selectedCustomer.currentDue || 0) : 0;
@@ -51,15 +72,20 @@ export default function CreatePayment() {
     try {
       const payload = {
         customerId: Number(customerId),
+        invoiceId: invoiceId ? Number(invoiceId) : null,
         amount: payAmt,
         paymentMode: paymentMode,
         referenceNumber: referenceNumber || "N/A",
         notes: notes || "Payment received at counter",
       };
 
-      await receivePayment(payload);
+      const res = await receivePayment(payload);
       alert("Payment recorded successfully and posted to ledger!");
-      navigate(`/customers/${customerId}/summary`);
+      if (res && res.id) {
+        navigate(`/payments/${res.id}`);
+      } else {
+        navigate(`/payments`);
+      }
     } catch (err) {
       console.error("Error recording payment:", err);
       setError(err.response?.data?.message || "Failed to record payment.");
@@ -68,141 +94,226 @@ export default function CreatePayment() {
     }
   };
 
+  const paymentModes = [
+    { id: "UPI", label: "UPI / QR", icon: "zap" },
+    { id: "CASH", label: "Cash", icon: "credit-card" },
+    { id: "BANK_TRANSFER", label: "Bank Transfer", icon: "store" },
+    { id: "CHEQUE", label: "Cheque", icon: "file-text" },
+    { id: "CARD", label: "Card", icon: "credit-card" },
+  ];
+
   return (
     <MainLayout>
-      <div style={{ maxWidth: 720, paddingBottom: 50 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#0f172a" }}>Record Customer Payment</h1>
-            <p style={{ margin: "4px 0 0", fontSize: 13, color: "#64748b" }}>Collect cash, UPI, or bank transfer against customer ledger</p>
-          </div>
-          <button onClick={() => navigate("/customers")} style={btnSecondary}>
-            Cancel
-          </button>
-        </div>
+      <div style={{ maxWidth: 740, margin: "0 auto", paddingBottom: 60 }}>
+        <PageHeader
+          title="Record Customer Payment"
+          subtitle="Collect cash, UPI, or bank transfer against customer ledger and auto-settle outstanding invoices"
+          breadcrumbs={[{ label: "Finance" }, { label: "Payments", href: "/payments" }, { label: "Record Payment" }]}
+          actions={
+            <Button
+              variant="secondary"
+              size="sm"
+              icon="arrow-left"
+              onClick={() => navigate("/payments")}
+            >
+              Cancel
+            </Button>
+          }
+        />
 
         {error && (
-          <div style={{ background: "#fdecea", color: "#c0392b", borderRadius: 8, padding: "10px 14px", fontSize: 13, marginBottom: 16 }}>
-            {error}
+          <div
+            style={{
+              background: "#FEE2E2",
+              border: `1px solid #FECDD3`,
+              color: colors.danger,
+              borderRadius: radius.md,
+              padding: "10px 14px",
+              fontSize: 13,
+              marginBottom: 16,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <Icon name="alert-triangle" size={16} />
+            <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ background: "#fff", borderRadius: 12, border: "1px solid #e2e8f0", padding: 24, display: "flex", flexDirection: "column", gap: 18 }}>
-          {/* Customer Selection */}
-          <div>
-            <label style={labelStyle}>Wholesale Customer *</label>
-            <select
-              value={customerId}
-              onChange={(e) => setCustomerId(e.target.value)}
-              style={inputStyle}
-              required
-            >
-              <option value="">-- Choose a Customer --</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.shopName || c.ownerName} ({c.phone}) — Outstanding: ₹{Number(c.currentDue || 0).toLocaleString("en-IN")}
-                </option>
-              ))}
-            </select>
-          </div>
+        <Card>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            {/* Wholesale Customer Selection */}
+            <div>
+              <Select
+                label="Wholesale Customer"
+                required
+                value={customerId}
+                onChange={(e) => setCustomerId(e.target.value)}
+                options={[
+                  { label: "-- Choose a Wholesale Customer --", value: "" },
+                  ...wholesaleCustomers.map((c) => ({
+                    label: `${c.shopName || c.ownerName} (${c.phone}) — Outstanding: ₹${Number(c.currentDue || 0).toLocaleString("en-IN")}`,
+                    value: c.id,
+                  })),
+                ]}
+              />
+            </div>
 
-          {/* Current Due and Live Balance Preview */}
-          {selectedCustomer && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, background: "#f8fafc", padding: 14, borderRadius: 8, border: "1px solid #e2e8f0" }}>
-              <div>
-                <span style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", fontWeight: 600 }}>CURRENT OUTSTANDING:</span>
-                <div style={{ fontSize: 18, fontWeight: 700, color: currentDue > 0 ? "#dc2626" : "#16a34a", marginTop: 2 }}>
-                  ₹{currentDue.toLocaleString("en-IN")}
+            {/* Current Due and Live Balance Preview */}
+            {selectedCustomer && (
+              <div
+                className="form-grid-responsive"
+                style={{
+                  gap: 16,
+                  background: colors.background,
+                  padding: "16px 20px",
+                  borderRadius: radius.md,
+                  border: `1px solid ${colors.border}`,
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                    CURRENT OUTSTANDING
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 22,
+                      fontWeight: 800,
+                      color: currentDue > 0 ? colors.danger : colors.success,
+                      marginTop: 4,
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    ₹{currentDue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                    REMAINING AFTER THIS PAYMENT
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 22,
+                      fontWeight: 800,
+                      color: remainingDue > 0 ? colors.warning : colors.success,
+                      marginTop: 4,
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    ₹{remainingDue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                  </div>
                 </div>
               </div>
-              <div>
-                <span style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", fontWeight: 600 }}>REMAINING AFTER THIS PAYMENT:</span>
-                <div style={{ fontSize: 18, fontWeight: 700, color: remainingDue > 0 ? "#b45309" : "#16a34a", marginTop: 2 }}>
-                  ₹{remainingDue.toLocaleString("en-IN")}
-                </div>
+            )}
+
+            {/* Amount Field */}
+            <div>
+              <Input
+                label="Amount Received (₹)"
+                type="number"
+                min="1"
+                step="any"
+                required
+                placeholder="e.g. 25000"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary, fontVariantNumeric: "tabular-nums" }}
+              />
+            </div>
+
+            {/* Payment Mode Selector */}
+            <div>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: colors.textPrimary, marginBottom: 8 }}>
+                Payment Mode <span style={{ color: colors.danger }}>*</span>
+              </label>
+              <div className="payment-modes-grid" style={{ gap: 8 }}>
+                {paymentModes.map((mode) => {
+                  const active = paymentMode === mode.id;
+                  return (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setPaymentMode(mode.id)}
+                      style={{
+                        padding: "10px 6px",
+                        borderRadius: radius.md,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        border: `1px solid ${active ? colors.primary : colors.border}`,
+                        background: active ? "#EEF2FF" : colors.surface,
+                        color: active ? colors.primary : colors.textSecondary,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 6,
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      <Icon name={mode.icon} size={16} />
+                      <span>{mode.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          )}
 
-          {/* Amount Field */}
-          <div>
-            <label style={labelStyle}>Amount Received (₹) *</label>
-            <input
-              type="number"
-              min="1"
-              step="any"
-              placeholder="e.g. 25000"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              style={{ ...inputStyle, fontSize: 18, fontWeight: 700, color: "#1e293b" }}
-              required
-            />
-          </div>
-
-          {/* Payment Mode Selector */}
-          <div>
-            <label style={labelStyle}>Payment Mode *</label>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8 }}>
-              {["CASH", "UPI", "BANK_TRANSFER", "CHEQUE", "CARD"].map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setPaymentMode(mode)}
-                  style={{
-                    padding: "10px 4px", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer",
-                    border: paymentMode === mode ? "2px solid #4361ee" : "1px solid #cbd5e1",
-                    background: paymentMode === mode ? "#eff6ff" : "#fff",
-                    color: paymentMode === mode ? "#4361ee" : "#475569",
-                  }}
-                >
-                  {mode.replace("_", " ")}
-                </button>
-              ))}
+            {/* Reference Number */}
+            <div>
+              <Input
+                label={`Transaction Reference / UTR Number ${paymentMode !== "CASH" ? "*" : "(Optional for Cash)"}`}
+                placeholder={paymentMode === "UPI" ? "e.g. UPI Ref / GooglePay Transaction ID" : "e.g. Cheque No / Bank Transfer UTR"}
+                value={referenceNumber}
+                onChange={(e) => setReferenceNumber(e.target.value)}
+              />
             </div>
-          </div>
 
-          {/* Reference Number */}
-          <div>
-            <label style={labelStyle}>Transaction Reference / UTR Number {paymentMode !== "CASH" ? "*" : ""}</label>
-            <input
-              type="text"
-              placeholder={paymentMode === "UPI" ? "e.g. PhonePe / GPay Ref ID" : "e.g. Cheque No / Bank UTR"}
-              value={referenceNumber}
-              onChange={(e) => setReferenceNumber(e.target.value)}
-              style={inputStyle}
-            />
-          </div>
+            {/* Notes */}
+            <div>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: colors.textPrimary, marginBottom: 6 }}>
+                Notes / Remarks
+              </label>
+              <textarea
+                rows={3}
+                placeholder="e.g. Part payment received against festive season wholesale delivery"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "9px 12px",
+                  borderRadius: radius.md,
+                  border: `1px solid ${colors.border}`,
+                  fontSize: 13,
+                  outline: "none",
+                  boxSizing: "border-box",
+                  fontFamily: "inherit",
+                  resize: "vertical",
+                }}
+              />
+            </div>
 
-          {/* Notes */}
-          <div>
-            <label style={labelStyle}>Notes / Remarks</label>
-            <textarea
-              rows={2}
-              placeholder="e.g. Received part payment for Diwali stock"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              style={{ ...inputStyle, resize: "vertical" }}
-            />
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 10 }}>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                padding: "12px 28px", background: "#10b981", color: "#fff",
-                border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer",
-              }}
-            >
-              {loading ? "Recording Payment..." : "✓ Confirm & Post to Ledger"}
-            </button>
-          </div>
-        </form>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 10 }}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => navigate("/payments")}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="success"
+                size="md"
+                icon="check"
+                loading={loading}
+              >
+                Confirm &amp; Post to Ledger
+              </Button>
+            </div>
+          </form>
+        </Card>
       </div>
     </MainLayout>
   );
 }
-
-const labelStyle = { display: "block", fontSize: 12, color: "#475569", marginBottom: 6, fontWeight: 600 };
-const inputStyle = { width: "100%", padding: "10px 12px", border: "1px solid #cbd5e1", borderRadius: 8, fontSize: 13, outline: "none", boxSizing: "border-box" };
-const btnSecondary = { padding: "8px 16px", background: "#fff", border: "1px solid #cbd5e1", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 500 };

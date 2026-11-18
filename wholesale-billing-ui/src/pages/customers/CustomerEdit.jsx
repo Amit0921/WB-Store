@@ -2,18 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import { getCustomerById, updateCustomer } from "../../api/customerApi";
-
-const labelStyle = { display: "block", fontSize: 12, color: "#64748b", marginBottom: 5, fontWeight: 500 };
-const inputStyle = { width: "100%", padding: "9px 12px", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 13, outline: "none", boxSizing: "border-box", color: "#1e293b" };
-
-const fields = [
-  { label: "Shop Name *", key: "shopName" },
-  { label: "Owner Name *", key: "ownerName" },
-  { label: "Phone *", key: "phone" },
-  { label: "GSTIN", key: "gstin" },
-  { label: "Billing Address", key: "address", wide: true },
-  { label: "Credit Limit (₹)", key: "creditLimit", type: "number" },
-];
+import { THEME } from "../../utils/theme";
+import Icon from "../../components/ui/Icon";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import Card from "../../components/ui/Card";
+import PageHeader from "../../components/ui/PageHeader";
 
 export default function CustomerEdit() {
   const { id } = useParams();
@@ -26,22 +20,41 @@ export default function CustomerEdit() {
   useEffect(() => {
     getCustomerById(id)
       .then((r) => setForm(r.data || r))
-      .catch((err) => setError("Failed to load customer details."))
+      .catch((err) => {
+        console.error("Error loading customer:", err);
+        setError("Failed to load customer profile details.");
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleSubmit = async () => {
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
     if (!form.shopName || !form.ownerName || !form.phone) {
-      setError("Shop name, owner name, and phone are required.");
+      setError("Shop name, owner name, and primary phone are required.");
       return;
     }
     setSaving(true);
     setError("");
     try {
-      await updateCustomer(id, form);
+      await updateCustomer(id, {
+        shopName: form.shopName,
+        ownerName: form.ownerName,
+        phone: form.phone,
+        alternatePhone: form.alternatePhone || null,
+        gstin: form.gstin || null,
+        address: form.address || null,
+        creditLimit: Number(form.creditLimit || 0),
+      });
       navigate("/customers");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update customer.");
+      setError(err.response?.data?.message || "Failed to update customer profile.");
     } finally {
       setSaving(false);
     }
@@ -49,55 +62,150 @@ export default function CustomerEdit() {
 
   if (loading) {
     return (
-      <MainLayout>
-        <div style={{ color: "#64748b", padding: 32 }}>Loading customer…</div>
+      <MainLayout maxWidth={860}>
+        <div style={{ padding: 48, textAlign: "center", color: THEME.colors.textMuted }}>
+          Loading customer account...
+        </div>
       </MainLayout>
     );
   }
 
   return (
-    <MainLayout>
-      <div style={{ maxWidth: 680, paddingBottom: 40 }}>
-        <div style={{ marginBottom: 20 }}>
-          <button onClick={() => navigate("/customers")} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: 13, padding: 0 }}>
-            ← Back to customers
-          </button>
-        </div>
+    <MainLayout maxWidth={860}>
+      <PageHeader
+        title={`Edit ${form.shopName || "Customer"}`}
+        subtitle="Update client contact information, tax identification, and credit line"
+        breadcrumbs={[
+          { label: "Directory", path: "/customers" },
+          { label: "Customers", path: "/customers" },
+          { label: form.shopName || "Edit" },
+        ]}
+        actions={
+          <Button variant="secondary" onClick={() => navigate("/customers")}>
+            Back to Directory
+          </Button>
+        }
+      />
 
-        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e2e8f0", padding: 28 }}>
-          <h2 style={{ margin: "0 0 24px", fontSize: 18, fontWeight: 700, color: "#0f172a" }}>Edit Wholesale Customer</h2>
+      <Card>
+        {error && (
+          <div
+            style={{
+              background: THEME.colors.dangerBg,
+              border: `1px solid ${THEME.colors.dangerBorder}`,
+              color: THEME.colors.danger,
+              borderRadius: THEME.radius.md,
+              padding: "12px 16px",
+              fontSize: "13px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 20,
+            }}
+          >
+            <Icon name="alert-circle" size={16} color={THEME.colors.danger} />
+            <span>{error}</span>
+          </div>
+        )}
 
-          {error && <div style={{ background: "#fdecea", color: "#c0392b", borderRadius: 8, padding: "10px 14px", fontSize: 13, marginBottom: 16 }}>{error}</div>}
+        <form onSubmit={handleSubmit}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 16,
+              marginBottom: 16,
+            }}
+            className="form-two-col"
+          >
+            <Input
+              label="Shop / Business Name"
+              name="shopName"
+              required
+              value={form.shopName}
+              onChange={handleChange}
+              icon={<Icon name="store" size={15} />}
+            />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            {fields.map((f) => (
-              <div key={f.key} style={f.wide ? { gridColumn: "1 / -1" } : {}}>
-                <label style={labelStyle}>{f.label}</label>
-                <input
-                  type={f.type || "text"}
-                  value={form[f.key] != null ? form[f.key] : ""}
-                  onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                  style={inputStyle}
-                />
-              </div>
-            ))}
-            <div>
-              <label style={labelStyle}>Status</label>
-              <select value={form.status || "ACTIVE"} onChange={(e) => setForm({ ...form, status: e.target.value })} style={inputStyle}>
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
-              </select>
-            </div>
+            <Input
+              label="Owner / Contact Person"
+              name="ownerName"
+              required
+              value={form.ownerName}
+              onChange={handleChange}
+              icon={<Icon name="user" size={15} />}
+            />
+
+            <Input
+              label="Primary Phone"
+              name="phone"
+              required
+              value={form.phone}
+              onChange={handleChange}
+              icon={<Icon name="phone" size={15} />}
+            />
+
+            <Input
+              label="Alternate Phone"
+              name="alternatePhone"
+              value={form.alternatePhone}
+              onChange={handleChange}
+              icon={<Icon name="phone" size={15} />}
+            />
+
+            <Input
+              label="GSTIN Identification"
+              name="gstin"
+              value={form.gstin}
+              onChange={handleChange}
+            />
+
+            <Input
+              label="Credit Limit (₹)"
+              type="number"
+              name="creditLimit"
+              value={form.creditLimit}
+              onChange={handleChange}
+              icon={<Icon name="inr" size={15} />}
+            />
           </div>
 
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 24 }}>
-            <button onClick={() => navigate("/customers")} style={{ padding: "9px 20px", background: "none", border: "1px solid #e2e8f0", borderRadius: 8, cursor: "pointer", fontSize: 13 }}>Cancel</button>
-            <button onClick={handleSubmit} disabled={saving} style={{ padding: "9px 20px", background: "#4361ee", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
-              {saving ? "Saving…" : "Save Changes"}
-            </button>
+          <div style={{ marginBottom: 24 }}>
+            <Input
+              label="Billing Address"
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+              icon={<Icon name="map-pin" size={15} />}
+            />
           </div>
-        </div>
-      </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 10,
+              paddingTop: 16,
+              borderTop: `1px solid ${THEME.colors.borderSubtle}`,
+            }}
+          >
+            <Button variant="secondary" onClick={() => navigate("/customers")}>
+              Discard Changes
+            </Button>
+            <Button type="submit" loading={saving} icon={<Icon name="check" size={15} />}>
+              Save Updates
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .form-two-col {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </MainLayout>
   );
 }

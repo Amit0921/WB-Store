@@ -25,6 +25,9 @@ public class JwtService {
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
 
+    @Value("${application.security.jwt.refresh-expiration:604800}")
+    private long refreshExpiration;
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -46,6 +49,18 @@ public class JwtService {
                 .setIssuedAt(new Date())
                 .setExpiration(
                         new Date(System.currentTimeMillis() + jwtExpiration * 1000)
+                )
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(
+                        new Date(System.currentTimeMillis() + refreshExpiration * 1000)
                 )
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();

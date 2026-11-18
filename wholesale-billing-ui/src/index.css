@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -12,9 +14,11 @@ body,
 }
 
 body {
-  font-family: "Inter", "Segoe UI", sans-serif;
-  background: #f4f3ff;
-  color: #0f172a;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #F7F8FC;
+  color: #171923;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
@@ -30,19 +34,183 @@ textarea {
   font-family: inherit;
 }
 
-.action-btn {
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  background: #f5f3ff;
-  color: #4c3cce;
-  cursor: pointer;
-  font-weight: 600;
-  text-align: left;
-  transition: all 0.2s ease;
+/* Tabular figures for monetary & numerical consistency */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
-.action-btn:hover {
-  background: #ede9fe;
-  transform: translateY(-1px);
+/* Smooth custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Print resets */
+@media print {
+  body {
+    background: #FFFFFF !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Responsive Grid & Layout Utilities */
+.grid-cols-4-responsive {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .grid-cols-4-responsive {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-cols-4-responsive {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+.grid-cols-3-responsive {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .grid-cols-3-responsive {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    gap: 14px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-cols-3-responsive {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+.grid-cols-2-responsive {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .grid-cols-2-responsive {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+/* Two-column master/detail workspace grid (POS, Invoicing, Customer Summary) */
+.layout-split-responsive {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .layout-split-responsive {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
+
+/* Payment Mode buttons grid */
+.payment-modes-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .payment-modes-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+  }
+}
+
+/* Responsive Table Container */
+.table-responsive-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile Friendly Form Grid */
+.form-grid-responsive,
+.form-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 640px) {
+  .form-grid-responsive,
+  .form-two-col {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .form-full-width {
+    width: 100% !important;
+  }
+}
+
+/* Printable Document / A4 Invoice / Receipt Card */
+.printable-document-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  border: 1px solid #E8EAF2;
+  padding: 40px 44px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+  .printable-document-card {
+    padding: 20px 16px !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* Filter Search Input Container */
+.filter-search-container {
+  width: 340px;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .app-topbar {
+    padding: 0 12px !important;
+  }
 }
