@@ -1734,3 +1734,44 @@ io.jsonwebtoken.ExpiredJwtException: JWT expired 7147017 milliseconds ago at 202
 2026-11-18T18:57:43.445+05:30  INFO 23720 --- [wb-store] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
 2026-11-18T18:57:43.513+05:30  INFO 23720 --- [wb-store] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : WbStoreHikariPool - Shutdown initiated...
 2026-11-18T18:57:43.528+05:30  INFO 23720 --- [wb-store] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : WbStoreHikariPool - Shutdown completed.
+2026-11-18T18:57:50.773+05:30  INFO 40152 --- [wb-store] [main] com.wholesale.store.StoreApplication     : Starting StoreApplication using Java 21.0.9 with PID 40152 (D:\Personal Work\WB-Store\store\target\classes started by Amit in D:\Personal Work\WB-Store)
+2026-11-18T18:57:50.777+05:30 DEBUG 40152 --- [wb-store] [main] com.wholesale.store.StoreApplication     : Running with Spring Boot v4.0.6, Spring v7.0.7
+2026-11-18T18:57:50.778+05:30  INFO 40152 --- [wb-store] [main] com.wholesale.store.StoreApplication     : The following 1 profile is active: "local"
+2026-11-18T18:57:52.492+05:30  INFO 40152 --- [wb-store] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-18T18:57:52.628+05:30  INFO 40152 --- [wb-store] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 121 ms. Found 11 JPA repository interfaces.
+2026-11-18T18:57:53.934+05:30  INFO 40152 --- [wb-store] [main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-11-18T18:57:53.956+05:30  INFO 40152 --- [wb-store] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-18T18:57:53.957+05:30  INFO 40152 --- [wb-store] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.21]
+2026-11-18T18:57:54.037+05:30  INFO 40152 --- [wb-store] [main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 3186 ms
+2026-11-18T18:57:54.277+05:30  INFO 40152 --- [wb-store] [main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-11-18T18:57:54.345+05:30  INFO 40152 --- [wb-store] [main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.12.Final
+2026-11-18T18:57:54.844+05:30  INFO 40152 --- [wb-store] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-18T18:57:54.880+05:30  INFO 40152 --- [wb-store] [main] com.zaxxer.hikari.HikariDataSource       : WbStoreHikariPool - Starting...
+2026-11-18T18:57:55.004+05:30  INFO 40152 --- [wb-store] [main] com.zaxxer.hikari.pool.HikariPool        : WbStoreHikariPool - Added connection org.postgresql.jdbc.PgConnection@6723e6b3
+2026-11-18T18:57:55.005+05:30  INFO 40152 --- [wb-store] [main] com.zaxxer.hikari.HikariDataSource       : WbStoreHikariPool - Start completed.
+2026-11-18T18:57:55.079+05:30  INFO 40152 --- [wb-store] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/wb_store]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 15.6
+	Default catalog/schema: wb_store/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-18T18:57:56.324+05:30  INFO 40152 --- [wb-store] [main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-18T18:57:56.465+05:30  INFO 40152 --- [wb-store] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-18T18:57:56.549+05:30  INFO 40152 --- [wb-store] [main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-11-18T18:57:56.830+05:30 DEBUG 40152 --- [wb-store] [main] c.w.s.c.s.JwtAuthenticationFilter        : Filter 'jwtAuthenticationFilter' configured for use
+2026-11-18T18:57:58.994+05:30  INFO 40152 --- [wb-store] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-11-18T18:58:00.061+05:30  INFO 40152 --- [wb-store] [main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-11-18T18:58:00.073+05:30  INFO 40152 --- [wb-store] [main] com.wholesale.store.StoreApplication     : Started StoreApplication in 10.109 seconds (process running for 10.731)
+2026-11-18T18:58:09.923+05:30  INFO 40152 --- [wb-store] [http-nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-18T18:58:09.931+05:30  INFO 40152 --- [wb-store] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-18T18:58:09.934+05:30  INFO 40152 --- [wb-store] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-11-18T18:58:18.366+05:30  WARN 40152 --- [wb-store] [http-nio-8080-exec-8] ration$PageModule$WarningLoggingModifier : Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
+	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
+	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+
