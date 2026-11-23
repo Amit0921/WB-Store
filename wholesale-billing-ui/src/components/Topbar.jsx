@@ -172,7 +172,7 @@ export default function Topbar({ onToggleSidebar }) {
               boxShadow: "0 0 0 2px rgba(22, 163, 106, 0.2)",
             }}
           />
-          Surat Market • Counter Active
+          Jeypore Market • Counter Active
         </div>
 
         {/* Quick POS Link */}

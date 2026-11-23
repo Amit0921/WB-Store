@@ -47,7 +47,7 @@ export default function Login() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#F7F8FC", display: "flex", flexDirection: "column" }}>
-      <NavbarHome buttonText="← Back to Home" buttonPath="/" />
+      <NavbarHome buttonText="Back to Home" buttonPath="/" />
 
       <div
         style={{
@@ -172,7 +172,7 @@ export default function Login() {
 
             {/* Footer */}
             <div style={{ position: "relative", zIndex: 1, fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
-              © 2026 myBusiness Inc. Surat Textile Market.
+              © 2026 myBusiness Inc. Jeypore Textile Market.
             </div>
           </div>
 
@@ -274,7 +274,7 @@ export default function Login() {
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 <button
                   type="button"
-                  onClick={() => quickFill("admin", "Admin@123")}
+                  onClick={() => quickFill("amit", "Admin@123")}
                   style={{
                     background: THEME.colors.primaryLight,
                     border: `1px solid rgba(76, 60, 206, 0.2)`,
@@ -290,7 +290,7 @@ export default function Login() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => quickFill("manager_test", "Manager@123")}
+                  onClick={() => quickFill("aditya", "Manager@123")}
                   style={{
                     background: "#F0F9FF",
                     border: "1px solid #BAE6FD",
@@ -306,7 +306,7 @@ export default function Login() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => quickFill("staff_test", "Staff@123")}
+                  onClick={() => quickFill("ravi", "Staff@123")}
                   style={{
                     background: "#F1F5F9",
                     border: "1px solid #CBD5E1",

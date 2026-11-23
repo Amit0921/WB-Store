@@ -176,7 +176,7 @@ export default function PaymentReceipt() {
                 </div>
               </div>
               <div style={{ fontSize: 12, color: colors.textSecondary, marginTop: 4 }}>
-                142/B Textile Market, Ring Road, Surat, Gujarat - 395002
+                142/B Textile Market, Ring Road, Surat, Gujarat - 764001
               </div>
               <div style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>
                 Phone: <strong style={{ color: colors.textPrimary }}>+91 98765 43210</strong> • GSTIN: <strong style={{ color: colors.textPrimary, fontFamily: "monospace" }}>24AAACW1234F1Z8</strong>

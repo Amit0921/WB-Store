@@ -289,7 +289,7 @@ export default function Home() {
           <Icon name="store" size={16} color={THEME.colors.primary} />
           <strong>WB-Store</strong> — Wholesale &amp; Retail Garments ERP
         </div>
-        <div>© 2026 myBusiness Inc. All rights reserved. Surat Textile Market, Gujarat.</div>
+        <div>© 2026 myBusiness Inc. All rights reserved. Jeypore Textile Market, Odisha.</div>
       </footer>
 
       <style>{`

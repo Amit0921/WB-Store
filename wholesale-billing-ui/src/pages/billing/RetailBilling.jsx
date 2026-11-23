@@ -349,7 +349,7 @@ export default function RetailBilling() {
               <div style={{ textAlign: "center", marginBottom: 14 }}>
                 <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: "1px" }}>WB-STORE</div>
                 <div style={{ fontSize: 10, color: colors.textSecondary }}>RETAIL GARMENTS COUNTER</div>
-                <div style={{ fontSize: 10, color: colors.textSecondary }}>Surat Textile Market, Gujarat</div>
+                <div style={{ fontSize: 10, color: colors.textSecondary }}>Jeypore Textile Market, Odisha</div>
                 <div style={{ fontSize: 10, color: colors.textSecondary }}>Ph: +91 98765 43210</div>
                 <div style={{ fontSize: 10, borderBottom: "1px dashed #000", paddingBottom: 6, marginTop: 4 }}>
                   GSTIN: 24AAACW1234F1Z8

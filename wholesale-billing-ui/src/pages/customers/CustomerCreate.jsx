@@ -168,7 +168,7 @@ export default function CustomerCreate() {
             <Input
               label="Billing Address"
               name="address"
-              placeholder="e.g. Shop #42, Surat Textile Market, Ring Road, Surat"
+              placeholder="e.g. Shop #42, Jeypore Textile Market, Ring Road, Jeypore"
               value={form.address}
               onChange={handleChange}
               icon={<Icon name="map-pin" size={15} />}

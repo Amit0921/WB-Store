@@ -151,7 +151,7 @@ export default function CustomerStatement() {
                 WB-STORE WHOLESALE GARMENTS
               </div>
               <div style={{ fontSize: "12px", color: THEME.colors.textSecondary, marginTop: 2 }}>
-                142/B Surat Textile Market, Ring Road, Surat, Gujarat - 395002
+                142/B Jeypore Textile Market, Ring Road, Jeypore, Odisha - 764001
               </div>
               <div style={{ fontSize: "11px", color: THEME.colors.textSecondary, marginTop: 2 }}>
                 Phone: +91 98765 43210 • GSTIN: 24AAACW1234F1Z8

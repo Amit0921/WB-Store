@@ -159,7 +159,7 @@ export default function ProductCreate() {
             className="form-two-col"
           >
             <Input
-              label="Garment Name"
+              label="Product Name"
               name="name"
               placeholder="e.g. Pure Cotton Printed Kurti"
               required
@@ -188,10 +188,16 @@ export default function ProductCreate() {
               <option value="Kurtis">Kurtis</option>
               <option value="Lehengas">Lehengas</option>
               <option value="Suits">Suits</option>
-              <option value="Shirts">Shirts</option>
+              <option value="Shirts">Shirts Men</option>
+              <option value="Shirts">Shirts Women</option>
               <option value="Dupatta">Dupatta</option>
               <option value="Fabrics">Fabrics</option>
               <option value="Kids Wear">Kids Wear</option>
+              <option value="Jeans Men">Jeans Men</option>
+              <option value="Jeans Women">Jeans Women</option>
+              <option value="Blanket">Blanket</option>
+              <option value="Bed Sheet">Bed Sheet</option>
+              <option value="Towel">Towel</option>
             </Select>
 
             <Input

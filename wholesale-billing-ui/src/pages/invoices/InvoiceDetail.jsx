@@ -17,7 +17,9 @@ export default function InvoiceDetail() {
   const [cancelling, setCancelling] = useState(false);
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-  const isOwner = currentUser?.roles?.includes("ADMIN");
+  const rawRoles = Array.isArray(currentUser?.roles) ? currentUser.roles : (currentUser?.roles ? Array.from(currentUser.roles) : []);
+  const roles = rawRoles.map((r) => (typeof r === "string" ? r.replace(/^ROLE_/, "") : r));
+  const isOwner = roles.includes("ADMIN");
 
   useEffect(() => {
     (async () => {
@@ -257,7 +259,7 @@ export default function InvoiceDetail() {
                 </div>
               </div>
               <div style={{ fontSize: 12, color: colors.textSecondary, marginTop: 4 }}>
-                142/B Textile Market, Ring Road, Surat, Gujarat - 395002
+                142/B Textile Market, Ring Road, Surat, Gujarat - 764001
               </div>
               <div style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>
                 Phone: <strong style={{ color: colors.textPrimary }}>+91 98765 43210</strong> • GSTIN: <strong style={{ color: colors.textPrimary, fontFamily: "monospace" }}>24AAACW1234F1Z8</strong>
